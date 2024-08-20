@@ -1,0 +1,10 @@
+services:
+  build-site:
+    build: .
+    user: "node"
+    working_dir: /home/node/app
+    volumes:
+      - ${PWD}/env.json:/home/node/app/env.json
+    command: "node build.js"
+    container_name: "build-site"
+    image: "build-site"
