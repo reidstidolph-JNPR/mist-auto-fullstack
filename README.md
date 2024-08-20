@@ -7,7 +7,7 @@ This app auto-builds a full stack site in Mist, complete with Wired, Wireless, a
 1. Have Docker (and optionally `docker-compose`) installed.
 2. Clone repo and `cd` to the directory
 ```
-git clone https://github.com/reidstidolph-JNPR/mist-wan-override-finder.git && cd mist-wan-override-finder
+git clone https://github.com/reidstidolph-JNPR/mist-auto-fullstack.git && cd mist-auto-fullstack
 ```
 3. Create a file called `env.json` with properties for `orgId`, `token` (API token), and `envBaseUrl` (base URL for API calls). Example:
 
