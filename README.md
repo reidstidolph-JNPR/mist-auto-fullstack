@@ -9,13 +9,24 @@ This app auto-builds a full stack site in Mist, complete with Wired, Wireless, a
 ```
 git clone https://github.com/reidstidolph-JNPR/mist-auto-fullstack.git && cd mist-auto-fullstack
 ```
-3. Create a file called `env.json` with properties for `orgId`, `token` (API token), and `envBaseUrl` (base URL for API calls). Example:
+3. Create a file called `env.json` with properties for:
+* `orgId` - your org ID
+* `token` - API token for your org
+* `envBaseUrl` - base URL for API calls (varies depending on cloud)
+* `gatewaytemplate_id` - SSR WAN template ID
+* `rftemplate_id` - Wireless template ID
+* `networktemplate_id` - Switch template ID
+
+Example:
 
 ```json
 {
   "token": "ru5...E5f",
   "orgId": "1ec....f2e",
-  "envBaseUrl": "https://api.mist.com/api/v1"
+  "envBaseUrl": "https://api.mist.com/api/v1",
+  "gatewaytemplate_id": "82d7...bc7a",
+  "rftemplate_id": "2277...9cfe",
+  "networktemplate_id": "56a4...ea19"
 }
 ```
 
@@ -33,7 +44,7 @@ docker build -t build-site .
 ```
 2. Run it:
 ```
-docker run --rm -v ./env.json:/home/node/app/env.json build-site
+docker run -it --rm -v ./env.json:/home/node/app/env.json build-site
 ```
 
 This creates a one-time container based on the image, and destroys it when finished. 
