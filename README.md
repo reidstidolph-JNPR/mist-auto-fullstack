@@ -25,7 +25,7 @@ Example:
   "orgId": "1ec....f2e",
   "envBaseUrl": "https://api.mist.com/api/v1",
   "gatewaytemplate_id": "82d7...bc7a",
-  "rftemplate_id": "2277...9cfe",
+  "wlantemplate_id": "2277...9cfe",
   "networktemplate_id": "56a4...ea19"
 }
 ```

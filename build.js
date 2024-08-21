@@ -8,7 +8,7 @@ const apiToken = require('./env.json').token
 const orgId = require('./env.json').orgId
 const envBaseUrl = require('./env.json').envBaseUrl
 const gatewaytemplate_id = require('./env.json').gatewaytemplate_id
-const rftemplate_id = require('./env.json').rftemplate_id
+const wlantemplate_id = require('./env.json').wlantemplate_id
 const networktemplate_id = require('./env.json').networktemplate_id
 const restReqConfig = { headers: { Authorization: `Token ${apiToken}` } }
 
@@ -30,9 +30,36 @@ async function getSites(){
 // create site
 async function createSite(site) {
 
+  // create settings for initial site creation
+  let siteSettings = {
+    name: site.name,
+    gatewaytemplate_id: site.gatewaytemplate_id,
+    networktemplate_id: site.networktemplate_id,
+    // hard coded site location data
+    timezone: "America/Denver",
+    country_code: "US",
+    address: "Denver, CO, USA",
+    latlng: {
+        lat: 39.739236,
+        lng: -104.990251
+    }
+  }
+
   try {
-    // get device inventory
-    let newSite = await rest.post(`${envBaseUrl}/orgs/${orgId}/sites`, site, restReqConfig)
+    // create site
+    console.log('creating site...')
+    let newSite = await rest.post(`${envBaseUrl}/orgs/${orgId}/sites`, siteSettings, restReqConfig)
+
+    // add site to wlan template
+    console.log('getting wlan template...')
+    let wlanTemplate = await rest.get(`${envBaseUrl}/orgs/${orgId}/templates/${wlantemplate_id}`, restReqConfig)
+
+    // add site to wlan template
+    console.log(`adding site '${newSite.data.name}' to template '${wlanTemplate.data.name}'...`)
+    wlanTemplate.data.applies.site_ids.push(newSite.data.id)
+    await rest.put(`${envBaseUrl}/orgs/${orgId}/templates/${wlantemplate_id}`, {applies: wlanTemplate.data.applies}, restReqConfig)
+
+    // return
     return newSite.data
 
   } catch (error) {
@@ -83,10 +110,11 @@ async function main() {
   let newSite = await createSite({
     name: siteName,
     gatewaytemplate_id: gatewaytemplate_id,
-    rftemplate_id: rftemplate_id,
+    wlantemplate_id: wlantemplate_id,
     networktemplate_id: networktemplate_id
   })
-  console.log(newSite)
+  
+  console.log(`site '${newSite.name}' build complete!`)
 
   /* get devices from inventory
   let devices = await getDevices()
