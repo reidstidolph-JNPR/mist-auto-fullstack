@@ -121,7 +121,7 @@ A `GET` to this endpoint is used to retrieve the list of sites. Used by script t
 A `POST` to this endpoint with site settings is used to create a new site.
 
 ```
-/orgs/${orgId}/sites
+/api/v1/orgs/${orgId}/sites
 ```
 
 ### WLAN Template
@@ -129,5 +129,5 @@ A `POST` to this endpoint with site settings is used to create a new site.
 A `GET` and a `PUT` is made to this endpoint to modify existing sites associated with the WLAN template, adding the newly created site.
 
 ```
-/orgs/${orgId}/templates/${wlantemplate_id}
+/api/v1/orgs/${orgId}/templates/${wlantemplate_id}
 ```
