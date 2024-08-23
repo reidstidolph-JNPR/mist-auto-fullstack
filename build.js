@@ -255,7 +255,9 @@ async function main() {
   if (assignmentResults.error.length > 0) {
     // print errors
     console.log('the following devices encountered errors:')
-    console.log(`device: '${assignmentResults.error[i]}' error: ${assignmentResults.reason[i]}`)
+    for (let i = 0; i < assignmentResults.error; i++) {
+      console.log(`device: '${assignmentResults.error[i]}' error: ${assignmentResults.reason[i]}`)
+    }
   }
   
   // done
