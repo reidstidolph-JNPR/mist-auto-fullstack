@@ -1,23 +1,19 @@
 'use strict'
 // modules
 const rest = require('axios')
+const fs = require('fs').promises
 const question = require('./lib/question')
 
-// import org details from env.json
-const apiToken = require('./env.json').token
-const orgId = require('./env.json').orgId
-const envBaseUrl = require('./env.json').envBaseUrl
-const gatewaytemplate_id = require('./env.json').gatewaytemplate_id
-const wlantemplate_id = require('./env.json').wlantemplate_id
-const networktemplate_id = require('./env.json').networktemplate_id
-const restReqConfig = { headers: { Authorization: `Token ${apiToken}` } }
+// import environment details from env.json
+const env = require('./env.json')
+const restReqConfig = { headers: { Authorization: `Token ${env.token}` } }
 
 // get sites
 async function getSites(){
 
   try {
     // get sites 
-    let sites = await rest.get(`${envBaseUrl}/orgs/${orgId}/sites`, restReqConfig)
+    let sites = await rest.get(`${env.baseUrl}/orgs/${env.orgId}/sites`, restReqConfig)
     return sites.data
 
   } catch (error) {
@@ -27,6 +23,7 @@ async function getSites(){
   }
 
 }
+
 // create site
 async function createSite(site) {
 
@@ -48,16 +45,16 @@ async function createSite(site) {
   try {
     // create site
     console.log('creating site...')
-    let newSite = await rest.post(`${envBaseUrl}/orgs/${orgId}/sites`, siteSettings, restReqConfig)
+    let newSite = await rest.post(`${env.baseUrl}/orgs/${env.orgId}/sites`, siteSettings, restReqConfig)
 
     // add site to wlan template
     console.log('getting wlan template...')
-    let wlanTemplate = await rest.get(`${envBaseUrl}/orgs/${orgId}/templates/${wlantemplate_id}`, restReqConfig)
+    let wlanTemplate = await rest.get(`${env.baseUrl}/orgs/${env.orgId}/templates/${env.wlantemplate_id}`, restReqConfig)
 
     // add site to wlan template
     console.log(`adding site '${newSite.data.name}' to template '${wlanTemplate.data.name}'...`)
     wlanTemplate.data.applies.site_ids.push(newSite.data.id)
-    await rest.put(`${envBaseUrl}/orgs/${orgId}/templates/${wlantemplate_id}`, {applies: wlanTemplate.data.applies}, restReqConfig)
+    await rest.put(`${env.baseUrl}/orgs/${env.orgId}/templates/${env.wlantemplate_id}`, {applies: wlanTemplate.data.applies}, restReqConfig)
 
     // return
     return newSite.data
@@ -70,18 +67,37 @@ async function createSite(site) {
 
 }
 
-// apply templates to site
-async function applyTemplates() {}
+// assign a devices from inventory to a site
+async function assignDeviceToSite(site_id, devices) {
 
-// assign device to site
-async function assignDeviceToSite() {}
+  console.log(`assigning devices from inventory to site...`)
+  let payload = {
+    op: "assign",
+    site_id: site_id,
+    macs: devices,
+    managed: true,
+    disable_auto_config: false
+  }
+
+  try {
+    // assign device to site
+    let inventoryAssignment = await rest.put(`${env.baseUrl}/orgs/${env.orgId}/inventory`, payload, restReqConfig)
+    return inventoryAssignment.data
+
+  } catch (error) {
+
+    console.error(error)
+    process.exit(1)
+  }
+}
 
 // get device inventory
 async function getDevices() {
 
+  console.log('getting devices from inventory...')
   try {
     // get device inventory
-    let inventory = await rest.get(`${envBaseUrl}/orgs/${orgId}/inventory`, restReqConfig)
+    let inventory = await rest.get(`${env.baseUrl}/orgs/${env.orgId}/inventory?unassigned=true`, restReqConfig)
     return inventory.data
 
   } catch (error) {
@@ -90,6 +106,83 @@ async function getDevices() {
     process.exit(1)
   }
 
+}
+
+// read devices file from disk
+async function readFile(filePath) {
+
+  console.log(`reading '${filePath}' from disk...`)
+  try {
+
+    // read file
+    let devices = await fs.readFile(filePath, 'utf8')
+
+    // create array with each line a separate entry
+    devices = devices.split('\n')
+
+    return devices
+
+  } catch (err) {
+
+    // unable to open file data
+    return null
+
+  }
+}
+
+// read devices from user
+async function readDevicesFromUser(unassignedDevices){
+  // prompt user to input devices
+  console.log('unassigned devices in inventory:')
+  console.log('mac            serial         type       ')
+  console.log('-----------------------------------------')
+  unassignedDevices.forEach(device => {
+    console.log(`${device.mac} | ${device.serial} | ${device.type} ${device.sku}`)
+  })
+  console.log('')
+
+  // get devices from user
+  let devicesFromUser = await question('Enter "," separated list of device MACs to add to site:')
+  // parse CSV into array of device MACs
+  devicesFromUser = devicesFromUser.split(",")
+
+  return devicesFromUser
+}
+
+// sanitize and validate an array of device MAC addresses
+function validateMacs(devices){
+
+  let sanitizedMacs = []
+  // sanitize 
+  devices.forEach(deviceMac => {
+
+    // bail out function
+    function quitOnBadFileData(error){
+      console.error(`${error}. Exiting.`)
+      process.exit(1)
+    }
+
+    // check for empty string
+    if (deviceMac.length === 0) { 
+      quitOnBadFileData('device data invalid, empty string found')
+    }
+
+    // remove any whitespace, colons, and convert to lowercase
+    let sanitizedMac = deviceMac.replace(/[\s:]+/g, '').toLowerCase()
+
+    // check for valid mac address
+    const regex = /^([0-9a-f]){12}$/
+    if (!regex.test(sanitizedMac)) {
+      quitOnBadFileData(`invalid device mac detected: '${deviceMac}'`)
+    }
+
+    sanitizedMacs.push(sanitizedMac)
+  })
+
+  // de-duplicate
+  sanitizedMacs = [...new Set(sanitizedMacs)]
+
+  return sanitizedMacs
 }
 
 // main script control
@@ -109,25 +202,65 @@ async function main() {
   console.log(`creating new site named '${siteName}'...`)
   let newSite = await createSite({
     name: siteName,
-    gatewaytemplate_id: gatewaytemplate_id,
-    wlantemplate_id: wlantemplate_id,
-    networktemplate_id: networktemplate_id
+    gatewaytemplate_id: env.gatewaytemplate_id,
+    wlantemplate_id: env.wlantemplate_id,
+    networktemplate_id: env.networktemplate_id
   })
   
   console.log(`site '${newSite.name}' build complete!`)
 
-  /* get devices from inventory
-  let devices = await getDevices()
-  // filter array to only the unassigned devices
-  devices = devices.filter(device => {
-    // only keep devices with no assigned site_id
-    if (device.site_id === null) {
-      return device
+  // get unassigned devices from inventory
+  let unassignedDevices = await getDevices()
+
+  // if there are no unassigned devices in iventory, exit
+  if (unassignedDevices.length === 0) {
+    console.log('no unassigned devices in inventory, exiting.')
+    process.exit(0)
+  }
+
+  // create variable for devices to add to site, to be assigned from user or file later
+  let devicesToAdd
+
+  // check for device file
+  let deviceFromFile = await readFile('./devices.txt')
+
+  if (deviceFromFile === null) {
+
+    // prompt user to input devices
+    let devicesFromUser = await readDevicesFromUser(unassignedDevices)
+
+    // sanitize and validate devices from user
+    devicesToAdd = validateMacs(devicesFromUser)
+
+  } else {
+
+    // sanitize and validate devices from file
+    devicesToAdd = validateMacs(deviceFromFile)
+  }
+
+  // make sure each device exists in unassigned inventory
+  devicesToAdd.forEach(device => {
+    let deviceInUnassigned = unassignedDevices.find(unassignedDevice => unassignedDevice.mac === device)
+    if (!deviceInUnassigned || Object.keys(deviceInUnassigned).length === 0) {
+      console.log(`device '${device}' does not exist in unassigned inventory. Exiting.`)
+      process.exit(0)
     }
   })
+  
+  // add devices to site
+  let assignmentResults = await assignDeviceToSite(newSite.id, devicesToAdd)
+  console.log(`devices added to site '${newSite.name}': ${assignmentResults.success.length}`)
 
-  console.log(devices)
-  */
+  // handle any site assignment errors
+  if (assignmentResults.error.length > 0) {
+    // print errors
+    console.log('the following devices encountered errors:')
+    console.log(`device: '${assignmentResults.error[i]}' error: ${assignmentResults.reason[i]}`)
+  }
+  
+  // done
+  console.log('\nautomated site build complete!\n')
+
 }
 
 main()

@@ -14,7 +14,7 @@ git clone https://github.com/reidstidolph-JNPR/mist-auto-fullstack.git && cd mis
 * `token` - API token for your org
 * `envBaseUrl` - base URL for API calls (varies depending on cloud)
 * `gatewaytemplate_id` - SSR WAN template ID
-* `rftemplate_id` - Wireless template ID
+* `wlantemplate_id` - Wireless template ID
 * `networktemplate_id` - Switch template ID
 
 Example:
@@ -23,7 +23,7 @@ Example:
 {
   "token": "ru5...E5f",
   "orgId": "1ec....f2e",
-  "envBaseUrl": "https://api.mist.com/api/v1",
+  "baseUrl": "https://api.mist.com/api/v1",
   "gatewaytemplate_id": "82d7...bc7a",
   "wlantemplate_id": "2277...9cfe",
   "networktemplate_id": "56a4...ea19"
@@ -67,15 +67,33 @@ docker-compose run --rm build-site
 
 ### Example output:
 ```
-% docker run --rm build-site
-getting sites...
-getting WAN edge inventory...
-getting device configs...
-device config retrieved, processing...
-2 of 2 devices with WAN edge site templates have device-level overrides.
-details:
- - 'Sunnyvale-Spoke' at site 'Sunnyvale' has overwrites to the 'service_policies' setting
- - 'Las_Vegas-Spoke' at site 'Las Vegas' has overwrites to the 'path_preferences' setting
+% docker run -it --rm -v ./env.json:/home/node/app/env.json build-site
+Enter a site name:
+foo
+creating new site named 'foo'...
+creating site...
+getting wlan template...
+adding site 'foo' to template 'Small-Branch'...
+site 'foo' build complete!
+getting devices from inventory...
+reading './devices.txt' from disk...
+assigning devices from inventory to site...
+added 3 devices to site 'foo'.
+
+automated site build complete!
+
+```
+
+## Optional
+A list of devices can be fed into the automation script in one of two ways:
+1. CLI prompted user input of comma-separated list (default)
+2. A file in the script directory called `devices.txt`
+
+If a `devices.txt` file is found, the script will not prompt for user input, and attempt to read from file. It expects the file to contain a device MACs, one per line. Example:
+```
+50c709979b5f
+c878670c4bce
+5433c601082e
 ```
 
 ## Mist API Usage
@@ -83,7 +101,31 @@ details:
 This script uses the following Mist API endpoints:
 
 ### Inventory
-This is queried to retrieve WAN edge device inventory, and used to determine what site each device is assigned to.
+A `GET` to this endpoint is used to retrieve unassigned device inventory.
+
 ```
-/api/v1/orgs/${orgId}/devices/search?type=gateway
+/api/v1/orgs/${orgId}/inventory?unassigned=true
+```
+
+A `POST` to this endpoint with devices is used to assign devices to a site.
+
+```
+/api/v1/orgs/${orgId}/inventory
+```
+
+### Sites
+A `GET` to this endpoint is used to retrieve the list of sites. Used by script to ensure a site with the same name does not already exist.
+
+A `POST` to this endpoint with site settings is used to create a new site.
+
+```
+/orgs/${orgId}/sites
+```
+
+### WLAN Template
+
+A `GET` and a `PUT` is made to this endpoint to modify existing sites associated with the WLAN template, adding the newly created site.
+
+```
+/orgs/${orgId}/templates/${wlantemplate_id}
 ```
