@@ -30,6 +30,8 @@ Example:
 }
 ```
 
+4. Have one or more devices you want to deploy using the automation, **claimed and unnassigned** in your Mist org inventory.
+
 ## Build and Run
 
 Use 1 of the following 2 options run the script:
