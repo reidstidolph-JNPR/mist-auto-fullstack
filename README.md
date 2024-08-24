@@ -20,7 +20,7 @@ git clone https://github.com/reidstidolph-JNPR/mist-auto-fullstack.git && cd mis
 * `siteSettings` -> `country_code` - site country code
 * `siteSettings` -> `address` - site address
 * `siteSettings` -> `latlng` - site coordinates
-* `siteSettings` -> `vars` - site variables
+* `siteSettings` -> `vars` (*optional*) - site variables
 
 Example:
 
