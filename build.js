@@ -7,12 +7,15 @@ const question = require('./lib/question')
 
 // import environment details from env.json
 const env = require('./env.json')
+
+// set token in auth header for API calls
 const restReqConfig = { headers: { Authorization: `Token ${env.token}` } }
 
 // get sites
 async function getSites() {
   try {
     // get sites
+    console.log(`\n>>> GET ${env.baseUrl}/orgs/${env.orgId}/sites\n`)
     let sites = await rest.get(`${env.baseUrl}/orgs/${env.orgId}/sites`, restReqConfig)
     return sites.data
   } catch (error) {
@@ -28,32 +31,54 @@ async function createSite(site) {
     name: site.name,
     gatewaytemplate_id: site.gatewaytemplate_id,
     networktemplate_id: site.networktemplate_id,
-    // hard coded site location data
-    timezone: 'America/Denver',
-    country_code: 'US',
-    address: 'Denver, CO, USA',
-    latlng: {
-      lat: 39.739236,
-      lng: -104.990251
-    }
+    // site location settings from env data
+    timezone: env.siteSettings.timezone,
+    country_code: env.siteSettings.country_code,
+    address: env.siteSettings.address,
+    latlng: env.siteSettings.latlng
   }
 
   try {
     // create site
-    console.log('creating site...')
+    console.log(`creating site '${site.name}'...`)
+    console.log(`\n>>> POST ${env.baseUrl}/orgs/${env.orgId}/sites\nPayload:\n${JSON.stringify(siteSettings, null, 2)}\n`)
     let newSite = await rest.post(`${env.baseUrl}/orgs/${env.orgId}/sites`, siteSettings, restReqConfig)
 
     // add site to wlan template
-    console.log('getting wlan template...')
+    console.log('getting wlan template to modify...')
+    console.log(`\n>>> GET ${env.baseUrl}/orgs/${env.orgId}/templates/${env.wlantemplate_id}\n`)
     let wlanTemplate = await rest.get(`${env.baseUrl}/orgs/${env.orgId}/templates/${env.wlantemplate_id}`, restReqConfig)
 
     // add site to wlan template
     console.log(`adding site '${newSite.data.name}' to template '${wlanTemplate.data.name}'...`)
-    wlanTemplate.data.applies.site_ids.push(newSite.data.id)
-    await rest.put(`${env.baseUrl}/orgs/${env.orgId}/templates/${env.wlantemplate_id}`, { applies: wlanTemplate.data.applies }, restReqConfig)
+    let templateSettings = {
+      applies: wlanTemplate.data.applies
+    }
+    templateSettings.applies.site_ids.push(newSite.data.id)
+    console.log(`\n>>> PUT ${env.baseUrl}/orgs/${env.orgId}/templates/${env.wlantemplate_id}\nPayload:\n${JSON.stringify(templateSettings, null, 2)}\n`)
+    await rest.put(`${env.baseUrl}/orgs/${env.orgId}/templates/${env.wlantemplate_id}`, templateSettings, restReqConfig)
 
     // return
     return newSite.data
+  } catch (error) {
+    console.error(error)
+    process.exit(1)
+  }
+}
+
+// modify site settings
+async function modifySite(site, vars) {
+
+  console.log('applying additional site settings...')
+  let siteSettings = {
+    vars: vars
+  }
+
+  try {
+    // modify site settings
+    console.log(`\n>>> PUT ${env.baseUrl}/sites/${site}/setting\nPayload:\n${JSON.stringify(siteSettings, null, 2)}\n`)
+    await rest.put(`${env.baseUrl}/sites/${site}/setting`, siteSettings, restReqConfig)
+    return
   } catch (error) {
     console.error(error)
     process.exit(1)
@@ -73,6 +98,7 @@ async function assignDeviceToSite(site_id, devices) {
 
   try {
     // assign device to site
+    console.log(`\n>>> PUT ${env.baseUrl}/orgs/${env.orgId}/inventory\nPayload:\n${JSON.stringify(payload, null, 2)}\n`)
     let inventoryAssignment = await rest.put(`${env.baseUrl}/orgs/${env.orgId}/inventory`, payload, restReqConfig)
     return inventoryAssignment.data
   } catch (error) {
@@ -86,6 +112,7 @@ async function getDevices() {
   console.log('getting devices from inventory...')
   try {
     // get device inventory
+    console.log(`\n>>> GET ${env.baseUrl}/orgs/${env.orgId}/inventory?unassigned=true\n`)
     let inventory = await rest.get(`${env.baseUrl}/orgs/${env.orgId}/inventory?unassigned=true`, restReqConfig)
     return inventory.data
   } catch (error) {
@@ -174,10 +201,11 @@ async function main() {
   if (sites.find(site => site.name === siteName)) {
     console.error(`site name '${siteName}' already exists. Exiting.`)
     process.exit(1)
+  } else {
+    console.log(`no site name '${siteName}' exists in org`)
   }
 
   // create site
-  console.log(`creating new site named '${siteName}'...`)
   let newSite = await createSite({
     name: siteName,
     gatewaytemplate_id: env.gatewaytemplate_id,
@@ -186,6 +214,11 @@ async function main() {
   })
 
   console.log(`site '${newSite.name}' build complete!`)
+
+  // check if site vars are provided
+  if (env.siteSettings && env.siteSettings.vars) {
+    await modifySite(newSite.id, env.siteSettings.vars)
+  }
 
   // get unassigned devices from inventory
   let unassignedDevices = await getDevices()

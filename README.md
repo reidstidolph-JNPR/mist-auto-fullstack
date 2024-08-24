@@ -16,6 +16,11 @@ git clone https://github.com/reidstidolph-JNPR/mist-auto-fullstack.git && cd mis
 * `gatewaytemplate_id` - SSR WAN template ID
 * `wlantemplate_id` - Wireless template ID
 * `networktemplate_id` - Switch template ID
+* `siteSettings` -> `timezone` - site timezone
+* `siteSettings` -> `country_code` - site country code
+* `siteSettings` -> `address` - site address
+* `siteSettings` -> `latlng` - site coordinates
+* `siteSettings` -> `vars` - site variables
 
 Example:
 
@@ -26,7 +31,19 @@ Example:
   "baseUrl": "https://api.mist.com/api/v1",
   "gatewaytemplate_id": "82d7...bc7a",
   "wlantemplate_id": "2277...9cfe",
-  "networktemplate_id": "56a4...ea19"
+  "networktemplate_id": "56a4...ea19",
+  "siteSettings": {
+    "timezone": "America/Denver",
+    "country_code": "US",
+    "address": "Denver, CO, USA",
+    "latlng": {
+      "lat": 39.739236,
+      "lng": -104.990251
+    },
+    "vars": {
+      "foo": "bar"
+    }
+  }
 }
 ```
 
