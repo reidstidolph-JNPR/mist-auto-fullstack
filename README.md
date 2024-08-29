@@ -2,14 +2,14 @@
 
 This app auto-builds a full stack site in Mist, complete with Wired, Wireless, and SSR WAN Edge.
 
-## Prerequisites and Setup
+Scripts and instructions are provied for several different environments: Docker, Python, NodeJS.
 
-1. Have Docker (and optionally `docker-compose`) installed.
-2. Clone repo and `cd` to the directory
+To get started:
+1. clone repo and `cd` to the directory:
 ```
 git clone https://github.com/reidstidolph-JNPR/mist-auto-fullstack.git && cd mist-auto-fullstack
 ```
-3. Create a file called `env.json` with properties for:
+2. Create a file called `env.json` with properties for:
 * `orgId` - your org ID
 * `token` - API token for your org
 * `envBaseUrl` - base URL for API calls (varies depending on cloud)
@@ -47,13 +47,18 @@ Example:
 }
 ```
 
-4. Have one or more devices you want to deploy using the automation, **claimed and unnassigned** in your Mist org inventory.
+## Docker
 
-## Build and Run
+### Prerequisites and Setup
+
+1. Have Docker (and optionally `docker-compose`) installed.
+2. Have one or more devices you want to deploy using the automation, **claimed and unnassigned** in your Mist org inventory.
+
+### Build and Run
 
 Use 1 of the following 2 options run the script:
 
-### with just Docker
+#### with just Docker
 
 Use this if you only have Docker.
 
@@ -77,33 +82,46 @@ Then to run subsequently:
 docker start -i build-site
 ```
 
-### with `docker-compose`
+#### with `docker-compose`
 
 1. Use this is you have Docker + docker-compose.
 ```
 docker-compose run --rm build-site
 ```
 
-### Example output:
+## Python
+### Prerequisites and Setup
+1. Have Pynthon3 and pip installed on your system.
+2. Install module dependencies:
 ```
-% docker run -it --rm -v ./env.json:/home/node/app/env.json build-site
-Enter a site name:
-foo
-creating new site named 'foo'...
-creating site...
-getting wlan template...
-adding site 'foo' to template 'Small-Branch'...
-site 'foo' build complete!
-getting devices from inventory...
-reading './devices.txt' from disk...
-assigning devices from inventory to site...
-added 3 devices to site 'foo'.
+pip3 install aiofiles
+pip3 install aiohttp
+pip3 install asyncio
+```
+### Run
 
-automated site build complete!
-
+1. Run the python version of the script:
+```
+python3 build.py
 ```
 
-## Optional
+## NodeJS
+### Prerequisites and Setup
+
+1. Have NodeJS installed on your system.
+2. Install module dependencies:
+```
+npm install
+```
+
+### Run
+
+1. Run the javascript version of the script:
+```
+node build.js
+```
+
+## Optional Usage
 A list of devices can be fed into the automation script in one of two ways:
 1. CLI prompted user input of comma-separated list (default)
 2. A file in the script directory called `devices.txt`

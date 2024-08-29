@@ -19,6 +19,9 @@ pids
 # Dependency directories
 node_modules/
 
+# Python local modules
+.venv/
+
 # Optional npm cache directory
 .npm
 
