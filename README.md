@@ -2,9 +2,9 @@
 
 This app auto-builds a full stack site in Mist, complete with Wired, Wireless, and SSR WAN Edge.
 
-Scripts and instructions are provied for several different environments: Docker, Python, NodeJS.
+Scripts and instructions are provided for several different environments: [Docker](#Docker), [Python](#Python), [NodeJS](#NodeJS).
 
-To get started:
+## Get Started
 1. clone repo and `cd` to the directory:
 ```
 git clone https://github.com/reidstidolph-JNPR/mist-auto-fullstack.git && cd mist-auto-fullstack
@@ -46,6 +46,8 @@ Example:
   }
 }
 ```
+
+Next, run the automation using [Docker](#Docker), [Python](#Python), or [NodeJS](#NodeJS).
 
 ## Docker
 
