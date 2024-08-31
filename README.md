@@ -2,7 +2,7 @@
 
 This app auto-builds a full stack site in Mist, complete with Wired, Wireless, and SSR WAN Edge.
 
-Scripts and instructions are provided for several different environments: [Docker](#Docker), [Python](#Python), [NodeJS](#NodeJS).
+Scripts and instructions are provided for several different environments: [Docker](#Docker), [Python](#Python), [Go](#Go), [NodeJS](#NodeJS), [PHP](#PHP), [Ruby](#Ruby).
 
 ## Get Started
 1. clone repo and `cd` to the directory:
@@ -47,7 +47,7 @@ Example:
 }
 ```
 
-Next, run the automation using [Docker](#Docker), [Python](#Python), or [NodeJS](#NodeJS).
+Next, run the automation using [Docker](#Docker), [Python](#Python), [Go](#Go), [NodeJS](#NodeJS), [PHP](#PHP), or [Ruby](#Ruby).
 
 ## Docker
 
@@ -92,35 +92,48 @@ docker-compose run --rm build-site
 ```
 
 ## Python
-### Prerequisites and Setup
-1. Have Pynthon3 and pip installed on your system.
-2. Install module dependencies:
+### Setup
+Install module dependencies:
 ```
 pip3 install aiofiles
 pip3 install aiohttp
 pip3 install asyncio
 ```
 ### Run
-
-1. Run the python version of the script:
+Run the python version of the script:
 ```
 python3 build.py
 ```
 
 ## NodeJS
-### Prerequisites and Setup
-
-1. Have NodeJS installed on your system.
-2. Install module dependencies:
+### Setup
+Install module dependencies:
 ```
 npm install
 ```
 
 ### Run
-
-1. Run the javascript version of the script:
+Run the javascript version of the script:
 ```
 node build.js
+```
+
+## Go
+Run the golang version of the script:
+```
+go run build.go
+```
+
+## PHP
+Run the PHP version of the script:
+```
+php build.php
+```
+
+## Ruby
+Run the Ruby version of the script:
+```
+ruby build.rb
 ```
 
 ## Optional Usage
