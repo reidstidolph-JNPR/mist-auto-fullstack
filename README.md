@@ -8,6 +8,7 @@ This app demonstrates automated build of a full stack site in Mist. All APIs use
 * [PHP](#PHP)
 * [Ruby](#Ruby)
 
+Site build demo:
 ![mist-site-build](https://github.com/user-attachments/assets/4e2b4fc7-5253-4ef6-a3df-f39108762345)
 
 ## Get Started
