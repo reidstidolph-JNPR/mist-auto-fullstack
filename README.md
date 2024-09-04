@@ -2,6 +2,8 @@
 
 This app auto-builds a full stack site in Mist, complete with Wired, Wireless, and SSR WAN Edge.
 
+[mist-site-build.webm](https://github.com/user-attachments/assets/2665a56a-f537-4606-9409-9bd063741870)
+
 Scripts and instructions are provided for several different environments: [Docker](#Docker), [Python](#Python), [Go](#Go), [NodeJS](#NodeJS), [PHP](#PHP), [Ruby](#Ruby).
 
 ## Get Started
