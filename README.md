@@ -1,6 +1,12 @@
 # Mist Full Stack Site Builder
 
-This app demonstrates automated build of a full stack site in Mist. All APIs used by the automation is clearly printed when run, and examples are provided for several different environments: [Docker](#Docker), [Python](#Python), [Go](#Go), [NodeJS](#NodeJS), [PHP](#PHP), [Ruby](#Ruby).
+This app demonstrates automated build of a full stack site in Mist. All APIs used by the automation is clearly printed when run, and examples are provided for several different environments: 
+* [Docker](#Docker)
+* [Python](#Python)
+* [Go](#Go)
+* [NodeJS](#NodeJS)
+* [PHP](#PHP)
+* [Ruby](#Ruby)
 
 ![mist-site-build](https://github.com/user-attachments/assets/4e2b4fc7-5253-4ef6-a3df-f39108762345)
 
