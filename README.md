@@ -148,7 +148,7 @@ A list of devices can be fed into the automation script in one of two ways:
 1. CLI prompted user input of comma-separated list (default)
 2. A file in the script directory called `devices.txt`
 
-If a `devices.txt` file is found, the script will not prompt for user input, and attempt to read from file. It expects the file to contain a device MACs, one per line. Example:
+If a `devices.txt` file is found, the script will not prompt for user input, and attempt to read from file. It expects the file to contain a list of device MACs, one per line. Example:
 ```
 50c709979b5f
 c878670c4bce
